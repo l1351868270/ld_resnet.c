@@ -776,7 +776,7 @@ void resnet_forward(Context *ctx, ResNet *model, Image* img, int B) {
     // }
     argmax_forward(s->xb4, s->xb3, s->N, p->num_labels);
     for (int i = 0; i < s->N; i++) {
-        printf("image:%d, label id: %d\n", i, *(s->xb4 + i));
+        printf("image:%d, label id: %d prob:%f \n", i, *(s->xb4 + i), s->xb3[*(s->xb4 + i)]);
     }
 }
 
