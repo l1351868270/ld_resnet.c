@@ -9,19 +9,20 @@ import struct
 
 processor = AutoImageProcessor.from_pretrained("microsoft/resnet-50")
 model = ResNetForImageClassification.from_pretrained("microsoft/resnet-50")
-
 # print(model)
 
 # url = "http://images.cocodataset.org/val2017/000000039769.jpg"
 # image = Image.open(requests.get(url, stream=True).raw)
-image = Image.open("./000000039769.jpg")
-# image = Image.open("./13.jpg")
-transform = transforms.Compose([transforms.ToTensor()])
-img_convert_to_numpy = np.array(image)
-img_convert_to_tensor2 = transform(img_convert_to_numpy)  # torch.Size([3, 480, 640])
+image = Image.open("./0.jpg")
+# image = Image.open("./1.jpg")
+inputs = processor(images=image, return_tensors="pt")
 
-# print(img_convert_to_numpy.shape)
-# print(img_convert_to_tensor2)
+outputs = model(**inputs)
+logits = outputs.logits
+print(logits.softmax(-1).max(-1))
+# model predicts one of the 1000 ImageNet classes
+predicted_class_idx = logits.argmax(-1).item()
+print("Predicted class:", model.config.id2label[predicted_class_idx])
 
 # img_bytes = img_convert_to_tensor2.detach().numpy().astype("float32").tobytes()
 # with open("image.bin", "wb") as file:
@@ -33,14 +34,15 @@ img_convert_to_tensor2 = transform(img_convert_to_numpy)  # torch.Size([3, 480, 
 # model["classifier.1.weight"]
 # outputs = model(torch.unsqueeze(img_convert_to_tensor2, 0),)
 # print(outputs.logits)
-outputs = model(torch.unsqueeze(img_convert_to_tensor2, 0),)
-print(outputs.logits.softmax(-1))
+# outputs = model(torch.unsqueeze(inputs, 0),)
+# print(outputs.logits.softmax(-1))
 
 # predicted_label = outputs.logits.argmax(-1).item()
 # print(model.config.id2label[predicted_label])
 
+inputs = inputs["pixel_values"]
 
-outputs = model.resnet.embedder.embedder.convolution(torch.unsqueeze(img_convert_to_tensor2, 0)) # [2, 64, 240, 320]
+outputs = model.resnet.embedder.embedder.convolution(inputs) # [2, 64, 240, 320]
 # print(outputs)
 outputs = model.resnet.embedder.embedder.normalization(outputs) # [2, 64, 240, 320]
 # print(outputs)
