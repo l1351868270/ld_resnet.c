@@ -455,8 +455,8 @@ void ResNetConvLayerV2(Context *ctx, float *output, float *input, RunState *s, R
     }
 
     int padding = kernel_size / 2;
-    s->H_out = (s->H_in + 2 * padding - kernel_size + 1) / stride;
-    s->W_out = (s->W_in + 2 * padding - kernel_size + 1) / stride;
+    s->H_out = (s->H_in + 2 * padding - kernel_size) / stride + 1;
+    s->W_out = (s->W_in + 2 * padding - kernel_size) / stride + 1;
     w->norm_weight = w->conv_weight + in_channels * out_channels * kernel_size * kernel_size;
     w->norm_bias =  w->norm_weight + out_channels;
     w->norm_running_mean = w->norm_bias + out_channels;
@@ -483,8 +483,8 @@ void ResNetEmbeddingsV2(Context *ctx, float *output, float *input, RunState *s, 
     int padding = 1;
     s->H_in = s->H_out;
     s->W_in = s->W_out;
-    s->H_out = (s->H_in + 2 * padding - kernel_size + 1) / stride;
-    s->W_out = (s->W_in + 2 * padding - kernel_size + 1) / stride;
+    s->H_out = (s->H_in + 2 * padding - kernel_size) / stride + 1;
+    s->W_out = (s->W_in + 2 * padding - kernel_size) / stride + 1;
     maxpool2d_forward(output, s->hidden1_0, s->N, p->embedding_size, s->H_in, s->W_in, s->H_out, s->W_out, kernel_size, stride, padding, 0, 0);
     // for (int i = 0; i < 320; i++) {
     //     printf("%d=%f ", i, *(output + i));
@@ -497,8 +497,8 @@ void ResNetShortCutV2(Context *ctx, float *output, float *input, RunState *s, Re
     }
     int kernel_size = 1;
     int padding = 0;
-    s->H_out = (s->H_in + 2 * padding - kernel_size + 1) / stride;
-    s->W_out = (s->W_in + 2 * padding - kernel_size + 1) / stride;
+    s->H_out = (s->H_in + 2 * padding - kernel_size) / stride + 1;
+    s->W_out = (s->W_in + 2 * padding - kernel_size) / stride + 1;
     w->norm_weight = w->conv_weight + in_channels * out_channels * kernel_size * kernel_size;
     w->norm_bias =  w->norm_weight + out_channels;
     w->norm_running_mean = w->norm_bias + out_channels;
@@ -706,7 +706,7 @@ void resnet_forward(Context *ctx, ResNet *model, Image* img, int B) {
     ResNetWeights *w = &model->weights;
     s->N = B;
 
-    int max_mem = s->N * p->embedding_size * ((img->height + 2 * 3 - 7 + 1) / 2) * ((img->width  + 2 * 3 - 7 + 1 ) / 2) * sizeof(float);
+    int max_mem = s->N * p->embedding_size * ((img->height + 2 * 3 - 7) / 2 + 1) * ((img->width  + 2 * 3 - 7) / 2 + 1) * sizeof(float);
     s->hidden0_0 = (float*)malloc(max_mem);
     s->hidden0_1 = (float*)malloc(max_mem);
     s->hidden1_0 = (float*)malloc(max_mem);
