@@ -1,5 +1,5 @@
 /*
-gcc -o resnet -g  resnet.c -lm
+gcc -o resnet -g  resnet.c -lm -fopenmp
 */
 
 #include <stdio.h>
@@ -706,20 +706,21 @@ void resnet_forward(Context *ctx, ResNet *model, Image* img, int B) {
     ResNetWeights *w = &model->weights;
     s->N = B;
 
-    s->hidden0_0 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden0_1 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden1_0 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden1_1 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden1_2 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden2_0 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden2_1 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden3_0 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->hidden3_1 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
+    int max_mem = s->N * p->embedding_size * ((img->height + 2 * 3 - 7 + 1) / 2) * ((img->width  + 2 * 3 - 7 + 1 ) / 2) * sizeof(float);
+    s->hidden0_0 = (float*)malloc(max_mem);
+    s->hidden0_1 = (float*)malloc(max_mem);
+    s->hidden1_0 = (float*)malloc(max_mem);
+    s->hidden1_1 = (float*)malloc(max_mem);
+    s->hidden1_2 = (float*)malloc(max_mem);
+    s->hidden2_0 = (float*)malloc(max_mem);
+    s->hidden2_1 = (float*)malloc(max_mem);
+    s->hidden3_0 = (float*)malloc(max_mem);
+    s->hidden3_1 = (float*)malloc(max_mem);
 
-    s->xb = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->xb1 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->xb2 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
-    s->xb3 = (float*)malloc(s->N * p->embedding_size * (img->height / 2) * (img->width / 2) * sizeof(float));
+    s->xb = (float*)malloc(max_mem);
+    s->xb1 = (float*)malloc(max_mem);
+    s->xb2 = (float*)malloc(max_mem);
+    s->xb3 = (float*)malloc(max_mem);
     s->xb4 = (int*)malloc(B);
 
     s->x = (float*)malloc(B * img->channel * img->height * img->width * sizeof(float));
